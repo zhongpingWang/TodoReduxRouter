@@ -5,34 +5,53 @@ var nodeModulesPath = path.resolve(__dirname, 'node_modules');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 //{index:'./index.js'},
 
+  // entry: {
+  //   A: ['webpack-hot-middleware/client', './src/a.js'],
+  //   B: ['webpack-hot-middleware/client', './src/b.js']
+  // },
+
 module.exports = {
-  entry:[
-   'webpack-dev-server/client?http://0.0.0.0:3000', // WebpackDevServer host and port
-    'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
+  devtool: 'cheap-module-eval-source-map',
+  entry: [
+    // necessary for hot reloading with IE:
+    'eventsource-polyfill',
+    // listen to code updates emitted by hot middleware:
+    'webpack-hot-middleware/client',
+
     './index.js'
   ],
-   
+
   output: {
     path: path.resolve(__dirname, 'dist'),
     publicPath: "/dist/",
     filename: 'js/index.js'
-   
+
   },
 
-    plugins: [
-        new webpack.optimize.CommonsChunkPlugin('js/comm.js'), 
-        // 给js中剥离的css的文件指定名称
-        new ExtractTextPlugin('/css/index.css'),
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin('js/comm.js'),
+    // 给js中剥离的css的文件指定名称
+    new ExtractTextPlugin('/css/index.css'),
 
-        new webpack.HotModuleReplacementPlugin()
-    ],
+    new webpack.HotModuleReplacementPlugin(),
+
+    new webpack.NoErrorsPlugin()
+  ],
 
   module: {
-    loaders: [
-      {test: /\.jsx?$/,exclude: /node_modules/, loaders: ['react-hot', 'babel?presets[]=react,presets[]=es2015']}, 
+    loaders: [{
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        loaders: ['babel']
+      },
       //{test: /\.js$/,loader: 'babel', query: {presets: ['es2015','react']},exclude: [nodeModulesPath]},
-      {test: /\.less$/,loader: ExtractTextPlugin.extract('style', 'css!less')},
-      {test: /\.(png|jpg)$/,loader: 'url?limit=2048&name=imgs/[name]_[hash:4].[ext]'} 
+      {
+        test: /\.less$/,
+        loader: ExtractTextPlugin.extract('style', 'css!less')
+      }, {
+        test: /\.(png|jpg)$/,
+        loader: 'url?limit=2048&name=imgs/[name]_[hash:4].[ext]'
+      }
 
     ]
   }
